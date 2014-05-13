@@ -27,11 +27,11 @@ OPTCOMP_OPT=-ppopt -let -ppopt ocpindent=true
 endif
 
 COMP=../compiler/$(COMPILER)
-JSFILES=../runtime/runtime.js ../runtime/weak.js ../runtime/toplevel.js ../runtime/graphics.js
+JSFILES=../runtime/runtime.js ../runtime/weak.js ../runtime/toplevel.js
 OCAMLC=ocamlfind ocamlc -package lwt,optcomp -syntax camlp4o $(OCPINDENT) $(OPTCOMP_OPT) -ppopt "../lib/syntax/pa_js.cmo" \
 	-I $(COMPILER_LIBS) -I ../compiler \
-	-I ../lib -I ../lib/graphics
-STDLIB= ../lib/$(LIBNAME).cma ../compiler/compiler.cma $(OCAMLLIB) $(BER) ../lib/graphics/graphics.cma
+	-I ../lib
+STDLIB= ../lib/$(LIBNAME).cma ../compiler/compiler.cma $(OCAMLLIB) $(BER)
 EXPUNGE=$(shell ocamlc -where)/expunge
 # Removed gc and sys
 STDLIB_MODULES=\
@@ -78,10 +78,7 @@ STDLIB_MODULES=\
   stringLabels \
   sys \
   weak \
-	graphics \
-	graphics_js \
 	lwt \
-	lwt_js \
 	bigarray
 
 JOO=js dom typed_array dom_html file dom_events firebug lwt_js sys_js regexp CSS url \
@@ -93,15 +90,15 @@ PERVASIVES=$(STDLIB_MODULES) $(JOO) $(BER_MODULE) outcometree topdirs toploop
 #toplevel.byte: $(OBJS:cmx=cmo) toplevel.cmo
 #	ocamlfind ocamlc -linkall -g -package str -linkpkg toplevellib.cma -o $@.tmp $^
 
-$(NAME).js: $(NAME).byte $(COMP) $(JSFILES) examples.ml
+$(NAME).js: $(NAME).byte $(COMP) $(JSFILES)
 	$(COMP) -toplevel -noruntime $(JSFILES) $(NAME).byte \
 	-I $(COMPILER_LIBS) \
 	-I $(shell ocamlfind query lwt) \
-	-I ./ -I ../lib/ -I ../lib/graphics \
-	-ofs toplevel-fs.js $(OPTIONS) -file examples.ml
+	-I ./ -I ../lib/ \
+	$(OPTIONS)
 
 $(NAME).byte: $(OBJS) ../compiler/compiler.cma
-	$(OCAMLC) -linkall -package findlib,graphics,lwt,bigarray $(OCPINDENT) -linkpkg -o $@.tmp $(STDLIB) $(OBJS)
+	$(OCAMLC) -linkall -package findlib,lwt,bigarray $(OCPINDENT) -linkpkg -o $@.tmp $(STDLIB) $(OBJS)
 	$(EXPUNGE) $@.tmp $@ $(PERVASIVES)
 	rm -f $@.tmp
 
@@ -110,9 +107,6 @@ $(NAME).byte: $(OBJS) ../compiler/compiler.cma
 
 ../compiler/compiler.cma:
 	$(MAKE) -C ../compiler compiler.cma
-
-server: server.ml
-	ocamlfind ocamlc -linkpkg -package findlib,cohttp.lwt server.ml -o server
 
 clean::
 	rm -f *.cm[io] $(NAME).byte $(NAME).js

@@ -315,18 +315,7 @@ let submits ?cancel_handler ?use_capture t =
 let selects ?cancel_handler ?use_capture t =
   seq_loop select ?cancel_handler ?use_capture t
 
-let transition_evn =
-  let e = Dom_html.createDiv Dom_html.document in
-  try
-    snd (List.find
-           (fun (propname, evname) ->
-             Js.Unsafe.get (e##style) propname != Js.undefined)
-           [("WebkitTransition", [Dom.Event.make "webkitTransitionEnd"]);
-            ("MozTransition", [Dom.Event.make "transitionend"]);
-            ("OTransition", [Dom.Event.make "oTransitionEnd";
-                             Dom.Event.make "otransitionend"]);
-            ("transition", [Dom.Event.make "transitionend"])])
-  with Not_found -> []
+let transition_evn = []
 
 let transitionend elt =
   match transition_evn with
