@@ -15,11 +15,6 @@ endif
 
 COMPILER_LIBS=$(shell ocamlc -where)/compiler-libs
 
-ifeq ($(METAOCAML),1)
-BER=metalib.cma bertop.cmo
-BER_MODULE=trx runcode
-endif
-
 OCPINDENT=$(shell ocamlfind query ocp-indent -format "-package %p.lib" 2> /dev/null)
 
 ifneq ($(OCPINDENT),)
@@ -31,15 +26,13 @@ JSFILES=../runtime/runtime.js ../runtime/weak.js ../runtime/toplevel.js
 OCAMLC=ocamlfind ocamlc -package lwt,optcomp -syntax camlp4o $(OCPINDENT) $(OPTCOMP_OPT) -ppopt "../lib/syntax/pa_js.cmo" \
 	-I $(COMPILER_LIBS) -I ../compiler \
 	-I ../lib
-STDLIB= ../lib/$(LIBNAME).cma ../compiler/compiler.cma $(OCAMLLIB) $(BER)
+STDLIB= ../lib/$(LIBNAME).cma ../compiler/compiler.cma $(OCAMLLIB)
 EXPUNGE=$(shell ocamlc -where)/expunge
 # Removed gc and sys
 STDLIB_MODULES=\
-  arg \
   array \
   arrayLabels \
   buffer \
-  callback \
   camlinternalLazy \
   camlinternalMod \
   camlinternalOO \
@@ -60,7 +53,6 @@ STDLIB_MODULES=\
   marshal \
   moreLabels \
   nativeint \
-  obj \
   oo \
   parsing \
   pervasives \
@@ -76,16 +68,10 @@ STDLIB_MODULES=\
   stream \
   string \
   stringLabels \
-  sys \
-  weak \
-	lwt \
-	bigarray
+  lwt \
+  bigarray
 
-JOO=js dom typed_array dom_html file dom_events firebug lwt_js sys_js regexp CSS url \
-  form xmlHttpRequest lwt_js_events json webGL webSockets keycode
-JOO=js
-
-PERVASIVES=$(STDLIB_MODULES) $(JOO) $(BER_MODULE) outcometree topdirs toploop
+PERVASIVES=$(STDLIB_MODULES) outcometree topdirs toploop
 
 #toplevel.byte: $(OBJS:cmx=cmo) toplevel.cmo
 #	ocamlfind ocamlc -linkall -g -package str -linkpkg toplevellib.cma -o $@.tmp $^
